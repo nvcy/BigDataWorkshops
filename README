@@ -1,96 +1,94 @@
-# 🚀 Big Data Ateliers – Hadoop Ecosystem Labs
+# 🚀 Big Data Ateliers – Complete Hadoop Ecosystem
 
-[![Docker](https://img.shields.io/badge/Docker-ready-blue?logo=docker)](https://www.docker.com/)
-[![Hadoop](https://img.shields.io/badge/Hadoop-3.x-yellow?logo=apache)](https://hadoop.apache.org/)
-[![Hive](https://img.shields.io/badge/Hive-SQL%20on%20HDFS-orange?logo=apachehive)](https://hive.apache.org/)
-[![Pig](https://img.shields.io/badge/Pig-Scripting%20on%20HDFS-lightgrey)](https://pig.apache.org/)
+<p align="center">  
+  <img src="https://img.shields.io/badge/Docker-ready-blue?logo=docker"/>  
+  <img src="https://img.shields.io/badge/Hadoop-3.x-yellow?logo=apache"/>  
+  <img src="https://img.shields.io/badge/Hive-SQL-orange?logo=apachehive"/>  
+  <img src="https://img.shields.io/badge/Pig-Scripting-lightgrey?logo=apache"/>  
+</p>  
 
-📌 This repository contains **6 hands-on Ateliers** to explore the Hadoop ecosystem inside Docker:
-
-* HDFS commands
-* MapReduce programming
-* Pig scripting
-* Hive queries
-* Hive file formats (Text/Parquet)
-* Hive partitioning
+<p align="center">  
+A complete <b>Hadoop ecosystem lab</b> with <b>6 ateliers</b> to practice HDFS, MapReduce, Pig, Hive, file formats, and partitioning.  
+Everything runs in <b>Docker</b> for simplicity and reproducibility.  
+</p>  
 
 ---
 
-## 📊 Ecosystem Architecture
+## 🌐 Architecture
 
-```
-   ┌───────────┐       ┌──────────────┐
-   │   Client  │──────▶│   Namenode    │
-   └───────────┘       └──────────────┘
-         │                     │
-         ▼                     ▼
-   ┌───────────┐       ┌──────────────┐
-   │ Datanodes │◀─────▶│   HDFS Data  │
-   └───────────┘       └──────────────┘
-         │
-   ┌─────────────┐
-   │ MapReduce   │  ← WordCount, custom jobs
-   └─────────────┘
-         │
-   ┌─────────────┬─────────────┐
-   │     Pig     │     Hive     │
-   │ (scripts)   │ (SQL engine) │
-   └─────────────┴─────────────┘
+```mermaid
+flowchart TD
+    Client[💻 Client] --> NN[Namenode]
+    NN -->|Stores metadata| DNs[Datanodes]
+    DNs -->|Stores blocks| HDFS[(HDFS Storage)]
+    HDFS --> MR[⚙️ MapReduce]
+    MR --> Pig[🐖 Pig Scripts]
+    MR --> Hive[🐝 Hive SQL]
 ```
 
 ---
 
-## 🛠️ Quick Setup
+## ⚡ Quick Start
+
+<details>  
+<summary>🔧 Setup Instructions</summary>  
 
 ```bash
-# Enter namenode container
+# Clone repo
+git clone https://github.com/your-org/hadoop-ecosystem-ateliers.git
+cd hadoop-ecosystem-ateliers
+
+# Build and start cluster
+docker compose up -d --build
+
+# Enter namenode
 docker exec -it namenode bash
 
-# Create atelier directories
+# Prepare ateliers in HDFS
 hdfs dfs -mkdir -p /ateliers/{atelier1,atelier2,atelier3,atelier4,atelier5,atelier6}
 
 # Upload datasets
 for i in {1..6}; do
-  hdfs dfs -put /opt/scripts/../data/ateliers/atelier$i/* /ateliers/atelier$i/
+  hdfs dfs -put /ateliers_local/atelier$i/* /ateliers/atelier$i/
 done
 ```
-
----
-
-## 📂 Ateliers
-
-### 📁 Atelier 1 – HDFS Commands
-
-<details>
-<summary>🔎 Click to expand</summary>  
-
-```bash
-# List ateliers
-hdfs dfs -ls /ateliers/
-
-# Show file contents
-hdfs dfs -cat /ateliers/atelier1/input/FL_insurance.csv | head -3
-
-# HDFS report
-hdfs dfsadmin -report | head -20
-```
-
-✅ Covers: HDFS navigation, file ops, block info.
 
 </details>  
 
 ---
 
-### 📁 Atelier 2 – MapReduce
+# 📚 Ateliers
 
-<details>
-<summary>📝 WordCount Job</summary>  
+---
+
+## 1️⃣ Atelier 1 – HDFS Basics
+
+<p align="center"><b>Explore HDFS commands and block reports.</b></p>
+
+```bash
+# List ateliers
+hdfs dfs -ls /ateliers/
+
+# Show contents
+hdfs dfs -cat /ateliers/atelier1/input/FL_insurance.csv | head -3
+
+# Report
+hdfs dfsadmin -report | head -20
+```
+
+✅ **Goal**: Learn file navigation, inspection, and block reports.
+
+---
+
+## 2️⃣ Atelier 2 – MapReduce
+
+<p align="center"><b>Run your first MapReduce WordCount job.</b></p>
 
 ```bash
 hdfs dfs -mkdir -p /ateliers/atelier2/wordcount/{input,output}
 hdfs dfs -put /ateliers/atelier2/maman.txt /ateliers/atelier2/wordcount/input/
 
-# Compile WordCount.java
+# Compile & package
 javac -cp $(hadoop classpath) -d build WordCount.java
 jar -cvf wordcount.jar -C build/ .
 
@@ -100,16 +98,13 @@ hadoop jar wordcount.jar WordCount \
   /ateliers/atelier2/wordcount/output
 ```
 
-✅ Covers: MapReduce basics, WordCount results.
-
-</details>  
+✅ **Goal**: Understand compilation, packaging, and execution of MapReduce jobs.
 
 ---
 
-### 📁 Atelier 3 – Pig
+## 3️⃣ Atelier 3 – Pig
 
-<details>
-<summary>🐖 Pig Analytics</summary>  
+<p align="center"><b>Analytics with Pig scripting.</b></p>
 
 ```bash
 pig -x local << 'EOF'
@@ -122,16 +117,13 @@ quit;
 EOF
 ```
 
-✅ Covers: Pig scripting, grouping, aggregations.
-
-</details>  
+✅ **Goal**: Aggregations with Pig Latin.
 
 ---
 
-### 📁 Atelier 4 – Hive Basics
+## 4️⃣ Atelier 4 – Hive Basics
 
-<details>
-<summary>🐝 SQL on Hadoop</summary>  
+<p align="center"><b>Query datasets with SQL using Hive.</b></p>
 
 ```sql
 CREATE DATABASE IF NOT EXISTS atelier4;
@@ -144,20 +136,17 @@ CREATE EXTERNAL TABLE vols (
 ROW FORMAT DELIMITED FIELDS TERMINATED BY ';'
 LOCATION '/ateliers/atelier4/';
 
--- Query: flights per airport
+-- Flights per airport
 SELECT depart, COUNT(*) FROM vols GROUP BY depart LIMIT 10;
 ```
 
-✅ Covers: Hive tables, queries, aggregations.
-
-</details>  
+✅ **Goal**: Create and query Hive tables.
 
 ---
 
-### 📁 Atelier 5 – Hive File Formats
+## 5️⃣ Atelier 5 – Hive File Formats
 
-<details>
-<summary>📦 Text vs Parquet</summary>  
+<p align="center"><b>Compare performance of text vs Parquet.</b></p>
 
 ```sql
 CREATE EXTERNAL TABLE bank_txt (
@@ -168,20 +157,17 @@ LOCATION '/ateliers/atelier5/';
 
 CREATE TABLE bank_parquet STORED AS PARQUET AS SELECT * FROM bank_txt;
 
--- Compare queries
+-- Compare performance
 SELECT region, AVG(income) FROM bank_txt GROUP BY region;
 ```
 
-✅ Covers: Storage optimization, Parquet vs Text.
-
-</details>  
+✅ **Goal**: Learn storage formats (Text vs Parquet).
 
 ---
 
-### 📁 Atelier 6 – Hive Partitioning
+## 6️⃣ Atelier 6 – Hive Partitioning
 
-<details>
-<summary>📊 Partitioned Tables</summary>  
+<p align="center"><b>Optimize queries with partitioned tables.</b></p>
 
 ```sql
 CREATE TABLE bank_partitioned (
@@ -190,7 +176,7 @@ CREATE TABLE bank_partitioned (
 PARTITIONED BY (region STRING)
 ROW FORMAT DELIMITED FIELDS TERMINATED BY ',';
 
--- Load with dynamic partitioning
+-- Dynamic partitioning
 SET hive.exec.dynamic.partition = true;
 SET hive.exec.dynamic.partition.mode = nonstrict;
 
@@ -198,29 +184,24 @@ INSERT OVERWRITE TABLE bank_partitioned PARTITION(region)
 SELECT id, age, sex, income, region FROM atelier5.bank_txt;
 ```
 
-✅ Covers: Partitioning, query optimization.
-
-</details>  
+✅ **Goal**: Learn Hive partitioning for performance.
 
 ---
 
-## ✅ Final Checklist
+# ✅ Progress Tracker
 
-* [x] HDFS commands (Atelier 1)
-* [x] MapReduce WordCount (Atelier 2)
-* [x] Pig analytics (Atelier 3)
-* [x] Hive basics (Atelier 4)
-* [x] Hive file formats (Atelier 5)
-* [x] Hive partitioning (Atelier 6)
-
-🎉 All ateliers completed successfully!
-
----
-
-🔗 **Tip:** You can re-run any atelier independently by entering the container:
-
-```bash
-docker exec -it namenode bash
-```
+<p align="center">  
+<table>  
+<tr><th>Atelier</th><th>Status</th></tr>  
+<tr><td>HDFS</td><td>✅ Completed</td></tr>  
+<tr><td>MapReduce</td><td>✅ Completed</td></tr>  
+<tr><td>Pig</td><td>✅ Completed</td></tr>  
+<tr><td>Hive Basics</td><td>✅ Completed</td></tr>  
+<tr><td>Hive File Formats</td><td>✅ Completed</td></tr>  
+<tr><td>Hive Partitioning</td><td>✅ Completed</td></tr>  
+</table>  
+</p>  
 
 ---
+
+<p align="center"><i>🎉 Congratulations! You now have a fully running Hadoop ecosystem with all 6 ateliers explored.</i></p>  
