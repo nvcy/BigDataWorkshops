@@ -1,266 +1,226 @@
-# 🚀 Big Data Ateliers Execution Guide
+# 🚀 Big Data Ateliers – Hadoop Ecosystem Labs
 
-This repository contains step-by-step labs (Ateliers) for learning the Hadoop ecosystem (HDFS, MapReduce, Pig, Hive).
+[![Docker](https://img.shields.io/badge/Docker-ready-blue?logo=docker)](https://www.docker.com/)
+[![Hadoop](https://img.shields.io/badge/Hadoop-3.x-yellow?logo=apache)](https://hadoop.apache.org/)
+[![Hive](https://img.shields.io/badge/Hive-SQL%20on%20HDFS-orange?logo=apachehive)](https://hive.apache.org/)
+[![Pig](https://img.shields.io/badge/Pig-Scripting%20on%20HDFS-lightgrey)](https://pig.apache.org/)
+
+📌 This repository contains **6 hands-on Ateliers** to explore the Hadoop ecosystem inside Docker:
+
+* HDFS commands
+* MapReduce programming
+* Pig scripting
+* Hive queries
+* Hive file formats (Text/Parquet)
+* Hive partitioning
 
 ---
 
-## 📂 Step 1: Create HDFS Structure & Upload Files
+## 📊 Ecosystem Architecture
+
+```
+   ┌───────────┐       ┌──────────────┐
+   │   Client  │──────▶│   Namenode    │
+   └───────────┘       └──────────────┘
+         │                     │
+         ▼                     ▼
+   ┌───────────┐       ┌──────────────┐
+   │ Datanodes │◀─────▶│   HDFS Data  │
+   └───────────┘       └──────────────┘
+         │
+   ┌─────────────┐
+   │ MapReduce   │  ← WordCount, custom jobs
+   └─────────────┘
+         │
+   ┌─────────────┬─────────────┐
+   │     Pig     │     Hive     │
+   │ (scripts)   │ (SQL engine) │
+   └─────────────┴─────────────┘
+```
+
+---
+
+## 🛠️ Quick Setup
 
 ```bash
 # Enter namenode container
 docker exec -it namenode bash
 
-# Create organized HDFS structure
+# Create atelier directories
 hdfs dfs -mkdir -p /ateliers/{atelier1,atelier2,atelier3,atelier4,atelier5,atelier6}
 
-# Upload all files to respective ateliers
-hdfs dfs -put /opt/scripts/../data/ateliers/atelier1/* /ateliers/atelier1/
-hdfs dfs -put /opt/scripts/../data/ateliers/atelier2/* /ateliers/atelier2/
-hdfs dfs -put /opt/scripts/../data/ateliers/atelier3/* /ateliers/atelier3/
-hdfs dfs -put /opt/scripts/../data/ateliers/atelier4/* /ateliers/atelier4/
-hdfs dfs -put /opt/scripts/../data/ateliers/atelier5/* /ateliers/atelier5/
-hdfs dfs -put /opt/scripts/../data/ateliers/atelier6/* /ateliers/atelier6/
-
-# Verify structure
-echo "=== HDFS ATELIER STRUCTURE ==="
-hdfs dfs -ls -R /ateliers/
+# Upload datasets
+for i in {1..6}; do
+  hdfs dfs -put /opt/scripts/../data/ateliers/atelier$i/* /ateliers/atelier$i/
+done
 ```
 
 ---
 
-## 📁 Atelier 1: HDFS Commands
+## 📂 Ateliers
+
+### 📁 Atelier 1 – HDFS Commands
+
+<details>
+<summary>🔎 Click to expand</summary>  
 
 ```bash
-echo "=========================================="
-echo "          ATELIER 1: HDFS COMMANDS        "
-echo "=========================================="
+# List ateliers
+hdfs dfs -ls /ateliers/
 
-# 1. Basic HDFS operations
-hdfs dfs -ls /
+# Show file contents
+hdfs dfs -cat /ateliers/atelier1/input/FL_insurance.csv | head -3
 
-# 2. File operations
-hdfs dfs -cat /ateliers/atelier1/FL_insurance.csv | head -3
-hdfs dfs -cat /ateliers/atelier1/purchases.txt | head -3
-
-# 3. HDFS administration
-hdfs dfsadmin -report | grep -E "Configured Capacity|Live datanodes"
-
-# 4. Storage information
-hdfs dfs -df -h
-
-# 5. File block details
-hdfs fsck /ateliers/atelier1/FL_insurance.csv -blocks -locations
-
-echo "✅ ATELIER 1 COMPLETED"
+# HDFS report
+hdfs dfsadmin -report | head -20
 ```
+
+✅ Covers: HDFS navigation, file ops, block info.
+
+</details>  
 
 ---
 
-## 📁 Atelier 2: MapReduce
+### 📁 Atelier 2 – MapReduce
+
+<details>
+<summary>📝 WordCount Job</summary>  
 
 ```bash
-echo "=========================================="
-echo "          ATELIER 2: MAPREDUCE           "
-echo "=========================================="
-
-# Create directories for MapReduce
 hdfs dfs -mkdir -p /ateliers/atelier2/wordcount/{input,output}
 hdfs dfs -put /ateliers/atelier2/maman.txt /ateliers/atelier2/wordcount/input/
 
-# Compile and run WordCount
-cd /tmp
-cp /ateliers/atelier2/WordCount.java /tmp/
-mkdir -p build
+# Compile WordCount.java
 javac -cp $(hadoop classpath) -d build WordCount.java
 jar -cvf wordcount.jar -C build/ .
 
-hdfs dfs -rm -r /ateliers/atelier2/wordcount/output 2>/dev/null
-hadoop jar wordcount.jar WordCount /ateliers/atelier2/wordcount/input /ateliers/atelier2/wordcount/output
-
-# Results
-hdfs dfs -cat /ateliers/atelier2/wordcount/output/part-r-00000 | head -10
-echo "✅ ATELIER 2 COMPLETED"
+# Run job
+hadoop jar wordcount.jar WordCount \
+  /ateliers/atelier2/wordcount/input \
+  /ateliers/atelier2/wordcount/output
 ```
+
+✅ Covers: MapReduce basics, WordCount results.
+
+</details>  
 
 ---
 
-## 📁 Atelier 3: Pig
+### 📁 Atelier 3 – Pig
+
+<details>
+<summary>🐖 Pig Analytics</summary>  
 
 ```bash
-echo "=========================================="
-echo "            ATELIER 3: PIG               "
-echo "=========================================="
-
 pig -x local << 'EOF'
-
 vols = LOAD '/ateliers/atelier3/vol.csv' USING PigStorage(';') 
        AS (year:int, month:int, day:int, flight:chararray, depart:chararray, destination:chararray, distance:int);
 
-departure_counts = FOREACH (GROUP vols BY depart) 
-                   GENERATE group AS airport, COUNT(vols) AS flight_count;
-
-total_distance = FOREACH (GROUP vols ALL) 
-                 GENERATE SUM(vols.distance) AS total_dist;
-
-max_distance = FOREACH (GROUP vols ALL) 
-               GENERATE MAX(vols.distance) AS max_dist;
-
+departure_counts = FOREACH (GROUP vols BY depart) GENERATE group, COUNT(vols);
 STORE departure_counts INTO '/ateliers/atelier3/pig_output/departure_counts';
-STORE total_distance INTO '/ateliers/atelier3/pig_output/total_distance';
-STORE max_distance INTO '/ateliers/atelier3/pig_output/max_distance';
 quit;
 EOF
-
-hdfs dfs -cat /ateliers/atelier3/pig_output/departure_counts/part-r-00000 | head -10
-hdfs dfs -cat /ateliers/atelier3/pig_output/total_distance/part-r-00000
-hdfs dfs -cat /ateliers/atelier3/pig_output/max_distance/part-r-00000
-
-echo "✅ ATELIER 3 COMPLETED"
 ```
+
+✅ Covers: Pig scripting, grouping, aggregations.
+
+</details>  
 
 ---
 
-## 📁 Atelier 4: Hive Basics
+### 📁 Atelier 4 – Hive Basics
 
-```bash
-echo "=========================================="
-echo "          ATELIER 4: HIVE BASICS         "
-echo "=========================================="
+<details>
+<summary>🐝 SQL on Hadoop</summary>  
 
-hive << 'EOF'
+```sql
 CREATE DATABASE IF NOT EXISTS atelier4;
 USE atelier4;
 
-CREATE EXTERNAL TABLE IF NOT EXISTS vols (
-    year INT, month INT, day INT,
-    flight STRING, depart STRING, destination STRING, distance INT
+CREATE EXTERNAL TABLE vols (
+    year INT, month INT, day INT, flight STRING,
+    depart STRING, destination STRING, distance INT
 )
 ROW FORMAT DELIMITED FIELDS TERMINATED BY ';'
 LOCATION '/ateliers/atelier4/';
 
-CREATE EXTERNAL TABLE IF NOT EXISTS temperatures (
-    year INT, temp INT, category INT
-)
-ROW FORMAT DELIMITED FIELDS TERMINATED BY ';'
-LOCATION '/ateliers/atelier4/';
-
-SELECT depart, COUNT(*) as flight_count FROM vols GROUP BY depart LIMIT 10;
-SELECT year, AVG(temp) as avg_temp FROM temperatures WHERE temp != 999 GROUP BY year;
-SELECT flight, depart, destination, distance FROM vols ORDER BY distance DESC LIMIT 5;
-EOF
-
-echo "✅ ATELIER 4 COMPLETED"
+-- Query: flights per airport
+SELECT depart, COUNT(*) FROM vols GROUP BY depart LIMIT 10;
 ```
+
+✅ Covers: Hive tables, queries, aggregations.
+
+</details>  
 
 ---
 
-## 📁 Atelier 5: Hive File Formats
+### 📁 Atelier 5 – Hive File Formats
 
-```bash
-echo "=========================================="
-echo "       ATELIER 5: HIVE FILE FORMATS      "
-echo "=========================================="
+<details>
+<summary>📦 Text vs Parquet</summary>  
 
-hive << 'EOF'
-CREATE DATABASE IF NOT EXISTS atelier5;
-USE atelier5;
-
+```sql
 CREATE EXTERNAL TABLE bank_txt (
-    id INT, age INT, sex STRING, region STRING, income DOUBLE, 
-    married STRING, children INT, car STRING, mortgage STRING
+    id INT, age INT, sex STRING, region STRING, income DOUBLE
 )
 ROW FORMAT DELIMITED FIELDS TERMINATED BY ','
 LOCATION '/ateliers/atelier5/';
 
 CREATE TABLE bank_parquet STORED AS PARQUET AS SELECT * FROM bank_txt;
 
-SELECT region, AVG(income) as avg_income FROM bank_txt GROUP BY region;
-
-SELECT COUNT(CASE WHEN married = 'YES' AND mortgage = 'YES' THEN 1 END) * 100.0 / COUNT(*) as percentage
-FROM bank_parquet;
-
-SELECT id, age, region, income FROM bank_txt ORDER BY income DESC LIMIT 5;
-EOF
-
-echo "✅ ATELIER 5 COMPLETED"
+-- Compare queries
+SELECT region, AVG(income) FROM bank_txt GROUP BY region;
 ```
+
+✅ Covers: Storage optimization, Parquet vs Text.
+
+</details>  
 
 ---
 
-## 📁 Atelier 6: Hive Partitioning
+### 📁 Atelier 6 – Hive Partitioning
 
-```bash
-echo "=========================================="
-echo "      ATELIER 6: HIVE PARTITIONING       "
-echo "=========================================="
+<details>
+<summary>📊 Partitioned Tables</summary>  
 
-hive << 'EOF'
-CREATE DATABASE IF NOT EXISTS atelier6;
-USE atelier6;
-
+```sql
 CREATE TABLE bank_partitioned (
-    id INT, age INT, sex STRING, income DOUBLE, 
-    married STRING, children INT, car STRING, mortgage STRING
+    id INT, age INT, sex STRING, income DOUBLE
 )
 PARTITIONED BY (region STRING)
 ROW FORMAT DELIMITED FIELDS TERMINATED BY ',';
 
+-- Load with dynamic partitioning
 SET hive.exec.dynamic.partition = true;
 SET hive.exec.dynamic.partition.mode = nonstrict;
 
 INSERT OVERWRITE TABLE bank_partitioned PARTITION(region)
-SELECT id, age, sex, income, married, children, car, mortgage, region FROM atelier5.bank_txt;
-
-SHOW PARTITIONS bank_partitioned;
-
-SELECT region, COUNT(*) as client_count, AVG(income) as avg_income FROM bank_partitioned GROUP BY region;
-SELECT * FROM bank_partitioned WHERE region = 'TOWN' LIMIT 5;
-EOF
-
-echo "✅ ATELIER 6 COMPLETED"
+SELECT id, age, sex, income, region FROM atelier5.bank_txt;
 ```
+
+✅ Covers: Partitioning, query optimization.
+
+</details>  
 
 ---
 
-## 🎯 Final Verification
+## ✅ Final Checklist
+
+* [x] HDFS commands (Atelier 1)
+* [x] MapReduce WordCount (Atelier 2)
+* [x] Pig analytics (Atelier 3)
+* [x] Hive basics (Atelier 4)
+* [x] Hive file formats (Atelier 5)
+* [x] Hive partitioning (Atelier 6)
+
+🎉 All ateliers completed successfully!
+
+---
+
+🔗 **Tip:** You can re-run any atelier independently by entering the container:
 
 ```bash
-echo "=========================================="
-echo "          FINAL VERIFICATION             "
-echo "=========================================="
-
-# 1. HDFS final structure
-hdfs dfs -ls -R /ateliers/ | grep -E "part-r-00000|SUCCESS"
-
-# 2. Hive databases and tables
-hive -e "SHOW DATABASES; SHOW TABLES IN atelier4; SHOW TABLES IN atelier5; SHOW TABLES IN atelier6;"
-
-# 3. Results summary
-echo "   - Atelier 1: HDFS operations ✓"
-echo "   - Atelier 2: MapReduce WordCount ✓"
-echo "   - Atelier 3: Pig analytics ✓"
-echo "   - Atelier 4: Hive basic queries ✓"
-echo "   - Atelier 5: Hive file formats ✓"
-echo "   - Atelier 6: Hive partitioning ✓"
-
-echo "🎉 ALL 6 ATELIERS COMPLETED SUCCESSFULLY! 🎉"
+docker exec -it namenode bash
 ```
 
 ---
-
-## 📊 Execution Summary
-
-This guide completes:
-
-* ✅ Organized HDFS structure
-* ✅ HDFS commands (Atelier 1)
-* ✅ MapReduce WordCount (Atelier 2)
-* ✅ Pig data processing (Atelier 3)
-* ✅ Hive basics (Atelier 4)
-* ✅ Hive file formats (Atelier 5)
-* ✅ Hive partitioning (Atelier 6)
-* ✅ Final verification
-
----
-
-🎯 You can now run each atelier step by step and verify results directly in HDFS/Hive.
