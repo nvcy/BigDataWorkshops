@@ -1,499 +1,266 @@
-Hadoop Ecosystem Workshop Solutions
+# 🚀 Big Data Ateliers Execution Guide
 
-This repository contains the complete solutions for a series of workshops covering the core components of the Hadoop ecosystem, including HDFS, MapReduce, Hive, and Pig. The solutions are based on a standard Cloudera Quickstart environment.
-📚 Table of Contents
+This repository contains step-by-step labs (Ateliers) for learning the Hadoop ecosystem (HDFS, MapReduce, Pig, Hive).
 
-    Prerequisites: Cloudera Quickstart Environment
+---
 
-    Atelier 1: Hadoop - HDFS
+## 📂 Step 1: Create HDFS Structure & Upload Files
 
-        Part 1: Hadoop Configuration & Services
-
-        Part 2: HDFS Commands
-
-        Part 3: SSH and Web Access
-
-    Atelier 2: MapReduce
-
-        WordCount Execution
-
-        WordTotal Exercise Solution
-
-    Atelier 3: Hive
-
-        Bank Data Analysis
-
-        Partitioning & Bucketing
-
-    Atelier 4: Pig
-
-        bank.csv Analysis
-
-🔧 Prerequisites: Cloudera Quickstart Environment
-
-All exercises are designed to be run within the Cloudera Quickstart VM, which can be easily set up using its official Docker image.
-
-    Create a session on Play with Docker.
-
-    Run the Cloudera Quickstart container. For detailed instructions, refer to the presentation "Utilisation de Cloudera Quickstart en ligne dans Docker Hub".
-
-📁 Atelier 1: Hadoop - HDFS
-
-This workshop covers the basics of the Hadoop Distributed File System (HDFS) and managing Hadoop services.
-Part 1: Hadoop Configuration & Services
-
-1. Display the content of /etc/hadoop/conf/core-site.xml:```bash
-cat /etc/hadoop/conf/core-site.xml
-code Code
-IGNORE_WHEN_COPYING_START
-IGNORE_WHEN_COPYING_END
-
-    
-**2. HDFS NameNode URL and Port:**
-The `fs.defaultFS` property in the file above specifies the URL. It is typically:
-`hdfs://quickstart.cloudera:8020`
-
-**3. Equivalence with `localhost`:**
-On the Cloudera Quickstart VM, the hostname `quickstart.cloudera` is mapped to the local loopback address (`127.0.0.1`), making it equivalent to `localhost` within the VM's context.
-
-**4. Replication Factor:**
-Check the `hdfs-site.xml` file for the `dfs.replication` property. In a single-node setup, the value is **1**.
 ```bash
-cat /etc/hadoop/conf/hdfs-site.xml
+# Enter namenode container
+docker exec -it namenode bash
 
-  
+# Create organized HDFS structure
+hdfs dfs -mkdir -p /ateliers/{atelier1,atelier2,atelier3,atelier4,atelier5,atelier6}
 
-5. Check Service Status:
-code Bash
-IGNORE_WHEN_COPYING_START
-IGNORE_WHEN_COPYING_END
+# Upload all files to respective ateliers
+hdfs dfs -put /opt/scripts/../data/ateliers/atelier1/* /ateliers/atelier1/
+hdfs dfs -put /opt/scripts/../data/ateliers/atelier2/* /ateliers/atelier2/
+hdfs dfs -put /opt/scripts/../data/ateliers/atelier3/* /ateliers/atelier3/
+hdfs dfs -put /opt/scripts/../data/ateliers/atelier4/* /ateliers/atelier4/
+hdfs dfs -put /opt/scripts/../data/ateliers/atelier5/* /ateliers/atelier5/
+hdfs dfs -put /opt/scripts/../data/ateliers/atelier6/* /ateliers/atelier6/
 
-    
-sudo service hadoop-hdfs-namenode status
-sudo service hadoop-hdfs-secondarynamenode status
-sudo service hadoop-hdfs-datanode status
-sudo service hadoop-yarn-resourcemanager status
-sudo service hadoop-yarn-nodemanger status
+# Verify structure
+echo "=== HDFS ATELIER STRUCTURE ==="
+hdfs dfs -ls -R /ateliers/
+```
 
-  
+---
 
-6. List Java Processes:
-The Java Virtual Machine Process Status tool (jps) lists the running Hadoop daemons.
-code Bash
-IGNORE_WHEN_COPYING_START
-IGNORE_WHEN_COPYING_END
+## 📁 Atelier 1: HDFS Commands
 
-    
-sudo jps -l
-
-  
-
-Part 2: HDFS Commands
-
-1. List the content of /user:
-code Bash
-IGNORE_WHEN_COPYING_START
-IGNORE_WHEN_COPYING_END
-
-    
-hdfs dfs -ls /user
-
-  
-
-2. Create a directory:
-code Bash
-IGNORE_WHEN_COPYING_START
-IGNORE_WHEN_COPYING_END
-
-    
-hdfs dfs -mkdir /user/cloudera/tp
-
-  
-
-3. Copy a local file to HDFS:
-code Bash
-IGNORE_WHEN_COPYING_START
-IGNORE_WHEN_COPYING_END
-
-    
-# Assuming FL_insurance.csv is in the current local directory
-hdfs dfs -put FL_insurance.csv /user/cloudera/tp
-
-  
-
-4. Display directory content:
-code Bash
-IGNORE_WHEN_COPYING_START
-IGNORE_WHEN_COPYING_END
-
-    
-hdfs dfs -ls /user/cloudera/tp
-
-  
-
-5. Display the last 10 lines of an HDFS file:```bash
-hdfs dfs -tail /user/cloudera/tp/FL_insurance.csv
-code Code
-IGNORE_WHEN_COPYING_START
-IGNORE_WHEN_COPYING_END
-
-    
-**6. Stop the NameNode:**
 ```bash
-sudo service hadoop-hdfs-namenode stop
+echo "=========================================="
+echo "          ATELIER 1: HDFS COMMANDS        "
+echo "=========================================="
 
-  
+# 1. Basic HDFS operations
+hdfs dfs -ls /
 
-7. Attempt an HDFS command:
-Any hdfs dfs command will now fail with a "Connection refused" error because the NameNode service is down.
+# 2. File operations
+hdfs dfs -cat /ateliers/atelier1/FL_insurance.csv | head -3
+hdfs dfs -cat /ateliers/atelier1/purchases.txt | head -3
 
-8. Restart the NameNode:
-code Bash
-IGNORE_WHEN_COPYING_START
-IGNORE_WHEN_COPYING_END
+# 3. HDFS administration
+hdfs dfsadmin -report | grep -E "Configured Capacity|Live datanodes"
 
-    
-sudo service hadoop-hdfs-namenode start
+# 4. Storage information
+hdfs dfs -df -h
 
-  
+# 5. File block details
+hdfs fsck /ateliers/atelier1/FL_insurance.csv -blocks -locations
 
-9. Get HDFS block size:
-code Bash
-IGNORE_WHEN_COPYING_START
-IGNORE_WHEN_COPYING_END
+echo "✅ ATELIER 1 COMPLETED"
+```
 
-    
-hdfs getconf -confKey dfs.blocksize
+---
 
-  
+## 📁 Atelier 2: MapReduce
 
-10. Get replication factor:
-code Bash
-IGNORE_WHEN_COPYING_START
-IGNORE_WHEN_COPYING_END
-
-    
-hdfs getconf -confKey dfs.replication
-
-  
-
-11. Copy purchases.txt to HDFS:
-code Bash
-IGNORE_WHEN_COPYING_START
-IGNORE_WHEN_COPYING_END
-
-    
-hdfs dfs -put purchases.txt /user/cloudera/tp
-
-  
-
-12. Use fsck for a detailed report:
-This command provides a health report, including block count, replicas, and locations.
-code Bash
-IGNORE_WHEN_COPYING_START
-IGNORE_WHEN_COPYING_END
-
-    
-hdfs fsck /user/cloudera/tp/purchases.txt -files -blocks -locations
-
-  
-
-13. Shell Script Solution:
-code Bash
-IGNORE_WHEN_COPYING_START
-IGNORE_WHEN_COPYING_END
-
-    
-#!/bin/bash
-HDFS_DIR="/user/cloudera/data"
-HDFS_SUBDIR="$HDFS_DIR/tpmr"
-LOCAL_DIR="shared_data" # Assumes files are in a local 'shared_data' folder
-
-# Clean up old directory if it exists
-hdfs dfs -test -d $HDFS_DIR && hdfs dfs -rm -r $HDFS_DIR
-echo "Cleaned up old directory: $HDFS_DIR"
-
-# Create new directories
-hdfs dfs -mkdir -p $HDFS_SUBDIR
-echo "Created directories: $HDFS_DIR and $HDFS_SUBDIR"
-
-# Copy files
-hdfs dfs -put $LOCAL_DIR/purchases.txt $HDFS_SUBDIR
-hdfs dfs -put $LOCAL_DIR/FL_insurance.csv $HDFS_SUBDIR
-echo "Files copied successfully."
-
-# Display the final structure
-echo "Displaying directory tree:"
-hdfs dfs -ls -R $HDFS_DIR
-
-  
-
-Part 3: SSH and Web Access
-
-    Get VM's IP Address: ifconfig eth0
-
-    HDFS Web UI: http://<VM_IP_ADDRESS>:50070
-
-💻 Atelier 2: MapReduce
-
-This workshop covers writing and executing Java-based MapReduce jobs.
-WordCount Execution
-
-1. Execute the pre-compiled WordCount job:
-code Bash
-IGNORE_WHEN_COPYING_START
-IGNORE_WHEN_COPYING_END
-
-    
-cd /home/cloudera/Tp_MapRed/WordCount
-hadoop jar wordcount.jar org.myorg.WordCount /user/cloudera/wordcount/input /user/cloudera/wordcount/output
-
-  
-
-2. View the results:
-code Bash
-IGNORE_WHEN_COPYING_START
-IGNORE_WHEN_COPYING_END
-
-    
-hdfs dfs -cat /user/cloudera/wordcount/output/*```
-
-### WordTotal Exercise Solution
-
-The goal is to modify `WordCount` to count the total number of words instead of counting each unique word.
-
-**Logic:**
--   **Mapper:** For each word, emit a constant key (e.g., `"total_words"`) and the value `1`.
--   **Reducer:** The reducer will receive a single key (`"total_words"`) and a list of `1`s. It simply sums these values to get the total count.
-
-**Execution Commands:**
 ```bash
-# Navigate to the correct directory
-cd /home/cloudera/Tp_MapRed/WordTotal_Solution
+echo "=========================================="
+echo "          ATELIER 2: MAPREDUCE           "
+echo "=========================================="
 
-# Clean and create build directory
-rm -rf build
-mkdir build
+# Create directories for MapReduce
+hdfs dfs -mkdir -p /ateliers/atelier2/wordcount/{input,output}
+hdfs dfs -put /ateliers/atelier2/maman.txt /ateliers/atelier2/wordcount/input/
 
-# Compile the Java source file
-javac -cp /usr/lib/hadoop/*:/usr/lib/hadoop-mapreduce/* WordTotal.java -d build -Xlint
+# Compile and run WordCount
+cd /tmp
+cp /ateliers/atelier2/WordCount.java /tmp/
+mkdir -p build
+javac -cp $(hadoop classpath) -d build WordCount.java
+jar -cvf wordcount.jar -C build/ .
 
-# Package the compiled classes into a JAR file
-jar -cvf wordtotal.jar -C build/ .
+hdfs dfs -rm -r /ateliers/atelier2/wordcount/output 2>/dev/null
+hadoop jar wordcount.jar WordCount /ateliers/atelier2/wordcount/input /ateliers/atelier2/wordcount/output
 
-# Clean HDFS output directory before running
-hdfs dfs -rm -r -f /user/cloudera/wordcount/output
+# Results
+hdfs dfs -cat /ateliers/atelier2/wordcount/output/part-r-00000 | head -10
+echo "✅ ATELIER 2 COMPLETED"
+```
 
-# Run the MapReduce job
-hadoop jar wordtotal.jar org.myorg.WordTotal /user/cloudera/wordcount/input /user/cloudera/wordcount/output
+---
 
-# View the final result
-echo "WordTotal Result:"
-hdfs dfs -cat /user/cloudera/wordcount/output/*
+## 📁 Atelier 3: Pig
 
-  
+```bash
+echo "=========================================="
+echo "            ATELIER 3: PIG               "
+echo "=========================================="
 
-🐝 Atelier 3: Hive
+pig -x local << 'EOF'
 
-This workshop explores data warehousing with Hive, including table creation, data loading, and querying.
-Bank Data Analysis
+vols = LOAD '/ateliers/atelier3/vol.csv' USING PigStorage(';') 
+       AS (year:int, month:int, day:int, flight:chararray, depart:chararray, destination:chararray, distance:int);
 
-1. Create HDFS directories:
-code Bash
-IGNORE_WHEN_COPYING_START
-IGNORE_WHEN_COPYING_END
+departure_counts = FOREACH (GROUP vols BY depart) 
+                   GENERATE group AS airport, COUNT(vols) AS flight_count;
 
-    
-hdfs dfs -mkdir -p /user/cloudera/hive_lab/data/{bank_txt,bank_avro,bank_parquet}
+total_distance = FOREACH (GROUP vols ALL) 
+                 GENERATE SUM(vols.distance) AS total_dist;
 
-  
+max_distance = FOREACH (GROUP vols ALL) 
+               GENERATE MAX(vols.distance) AS max_dist;
 
-2. Copy data file to the bank_txt directory:
-code Bash
-IGNORE_WHEN_COPYING_START
-IGNORE_WHEN_COPYING_END
+STORE departure_counts INTO '/ateliers/atelier3/pig_output/departure_counts';
+STORE total_distance INTO '/ateliers/atelier3/pig_output/total_distance';
+STORE max_distance INTO '/ateliers/atelier3/pig_output/max_distance';
+quit;
+EOF
 
-    
-hdfs dfs -put bank-data.csv /user/cloudera/hive_lab/data/bank_txt
+hdfs dfs -cat /ateliers/atelier3/pig_output/departure_counts/part-r-00000 | head -10
+hdfs dfs -cat /ateliers/atelier3/pig_output/total_distance/part-r-00000
+hdfs dfs -cat /ateliers/atelier3/pig_output/max_distance/part-r-00000
 
-  
+echo "✅ ATELIER 3 COMPLETED"
+```
 
-3. Create the text-based external table bank_txt:
-code SQL
-IGNORE_WHEN_COPYING_START
-IGNORE_WHEN_COPYING_END
+---
 
-    
+## 📁 Atelier 4: Hive Basics
+
+```bash
+echo "=========================================="
+echo "          ATELIER 4: HIVE BASICS         "
+echo "=========================================="
+
+hive << 'EOF'
+CREATE DATABASE IF NOT EXISTS atelier4;
+USE atelier4;
+
+CREATE EXTERNAL TABLE IF NOT EXISTS vols (
+    year INT, month INT, day INT,
+    flight STRING, depart STRING, destination STRING, distance INT
+)
+ROW FORMAT DELIMITED FIELDS TERMINATED BY ';'
+LOCATION '/ateliers/atelier4/';
+
+CREATE EXTERNAL TABLE IF NOT EXISTS temperatures (
+    year INT, temp INT, category INT
+)
+ROW FORMAT DELIMITED FIELDS TERMINATED BY ';'
+LOCATION '/ateliers/atelier4/';
+
+SELECT depart, COUNT(*) as flight_count FROM vols GROUP BY depart LIMIT 10;
+SELECT year, AVG(temp) as avg_temp FROM temperatures WHERE temp != 999 GROUP BY year;
+SELECT flight, depart, destination, distance FROM vols ORDER BY distance DESC LIMIT 5;
+EOF
+
+echo "✅ ATELIER 4 COMPLETED"
+```
+
+---
+
+## 📁 Atelier 5: Hive File Formats
+
+```bash
+echo "=========================================="
+echo "       ATELIER 5: HIVE FILE FORMATS      "
+echo "=========================================="
+
+hive << 'EOF'
+CREATE DATABASE IF NOT EXISTS atelier5;
+USE atelier5;
+
 CREATE EXTERNAL TABLE bank_txt (
-    id INT,
-    age INT,
-    sex STRING,
-    region STRING,
-    income DOUBLE,
-    married STRING,
-    children INT,
-    car STRING,
-    mortgage STRING
+    id INT, age INT, sex STRING, region STRING, income DOUBLE, 
+    married STRING, children INT, car STRING, mortgage STRING
 )
 ROW FORMAT DELIMITED FIELDS TERMINATED BY ','
-LOCATION '/user/cloudera/hive_lab/data/bank_txt';
+LOCATION '/ateliers/atelier5/';
 
-  
+CREATE TABLE bank_parquet STORED AS PARQUET AS SELECT * FROM bank_txt;
 
-4. Create and load Avro and Parquet tables from bank_txt:
-code SQL
-IGNORE_WHEN_COPYING_START
-IGNORE_WHEN_COPYING_END
+SELECT region, AVG(income) as avg_income FROM bank_txt GROUP BY region;
 
-    
--- Create Avro table
-CREATE EXTERNAL TABLE bank_avro
-STORED AS AVRO
-LOCATION '/user/cloudera/hive_lab/data/bank_avro'
-AS SELECT * FROM bank_txt;
-
--- Create Parquet table
-CREATE EXTERNAL TABLE bank_parquet
-STORED AS PARQUET
-LOCATION '/user/cloudera/hive_lab/data/bank_parquet'
-AS SELECT * FROM bank_txt;
-
-  
-
-5. Query Solutions (using the efficient Parquet table):
-
-a) Average income per region:
-code SQL
-IGNORE_WHEN_COPYING_START
-IGNORE_WHEN_COPYING_END
-
-    
-SELECT region, AVG(income) as avg_income FROM bank_parquet GROUP BY region;
-
-  
-
-b) Percentage of married clients with a mortgage:
-code SQL
-IGNORE_WHEN_COPYING_START
-IGNORE_WHEN_COPYING_END
-
-    
-SELECT (SUM(CASE WHEN married = 'YES' AND mortgage = 'YES' THEN 1 ELSE 0 END) * 100.0 / COUNT(*)) as percentage
+SELECT COUNT(CASE WHEN married = 'YES' AND mortgage = 'YES' THEN 1 END) * 100.0 / COUNT(*) as percentage
 FROM bank_parquet;
 
-  
+SELECT id, age, region, income FROM bank_txt ORDER BY income DESC LIMIT 5;
+EOF
 
-c) Number of married clients with children and a mortgage, per region:
-code SQL
-IGNORE_WHEN_COPYING_START
-IGNORE_WHEN_COPYING_END
+echo "✅ ATELIER 5 COMPLETED"
+```
 
-    
-SELECT region, COUNT(*) as client_count
-FROM bank_parquet
-WHERE married = 'YES' AND children > 0 AND mortgage = 'YES'
-GROUP BY region;
+---
 
-  
+## 📁 Atelier 6: Hive Partitioning
 
-d) IDs of clients with the maximum income:
-code SQL
-IGNORE_WHEN_COPYING_START
-IGNORE_WHEN_COPYING_END
+```bash
+echo "=========================================="
+echo "      ATELIER 6: HIVE PARTITIONING       "
+echo "=========================================="
 
-    
-SELECT id FROM bank_parquet
-WHERE income = (SELECT MAX(income) FROM bank_parquet);
+hive << 'EOF'
+CREATE DATABASE IF NOT EXISTS atelier6;
+USE atelier6;
 
-  
+CREATE TABLE bank_partitioned (
+    id INT, age INT, sex STRING, income DOUBLE, 
+    married STRING, children INT, car STRING, mortgage STRING
+)
+PARTITIONED BY (region STRING)
+ROW FORMAT DELIMITED FIELDS TERMINATED BY ',';
 
-Partitioning & Bucketing
+SET hive.exec.dynamic.partition = true;
+SET hive.exec.dynamic.partition.mode = nonstrict;
 
-This involves creating tables with PARTITIONED BY and CLUSTERED BY clauses to optimize queries by pruning data. The solutions follow the patterns shown in the presentation slides, using INSERT OVERWRITE TABLE ... SELECT ... to populate the tables.
-🐖 Atelier 4: Pig
+INSERT OVERWRITE TABLE bank_partitioned PARTITION(region)
+SELECT id, age, sex, income, married, children, car, mortgage, region FROM atelier5.bank_txt;
 
-This workshop focuses on data flow programming using Pig Latin.
-bank.csv Analysis
+SHOW PARTITIONS bank_partitioned;
 
-1. IDs of clients who were debtors at least once:
-code Pig
-IGNORE_WHEN_COPYING_START
-IGNORE_WHEN_COPYING_END
+SELECT region, COUNT(*) as client_count, AVG(income) as avg_income FROM bank_partitioned GROUP BY region;
+SELECT * FROM bank_partitioned WHERE region = 'TOWN' LIMIT 5;
+EOF
 
-    
-records = LOAD 'bank.csv' USING PigStorage(';') AS (id_banque:chararray, id_client:int, verse:long, retire:long, annee:int);
-debtor_transactions = FILTER records BY verse < retire;
-unique_debtors = DISTINCT debtor_transactions.id_client;
-DUMP unique_debtors;
+echo "✅ ATELIER 6 COMPLETED"
+```
 
-  
+---
 
-2. Number of clients per bank:
-code Pig
-IGNORE_WHEN_COPYING_START
-IGNORE_WHEN_COPYING_END
+## 🎯 Final Verification
 
-    
-records = LOAD 'bank.csv' USING PigStorage(';') AS (id_banque:chararray, id_client:int, verse:long, retire:long, annee:int);
-grouped_by_bank = GROUP records BY id_banque;
-client_counts = FOREACH grouped_by_bank GENERATE group AS bank, COUNT(records.id_client) AS num_clients;
-DUMP client_counts;
+```bash
+echo "=========================================="
+echo "          FINAL VERIFICATION             "
+echo "=========================================="
 
-  
+# 1. HDFS final structure
+hdfs dfs -ls -R /ateliers/ | grep -E "part-r-00000|SUCCESS"
 
-3. Number of debtor clients per bank:
-code Pig
-IGNORE_WHEN_COPYING_START
-IGNORE_WHEN_COPYING_END
+# 2. Hive databases and tables
+hive -e "SHOW DATABASES; SHOW TABLES IN atelier4; SHOW TABLES IN atelier5; SHOW TABLES IN atelier6;"
 
-    
-records = LOAD 'bank.csv' USING PigStorage(';') AS (id_banque:chararray, id_client:int, verse:long, retire:long, annee:int);
-debtor_transactions = FILTER records BY verse < retire;
-grouped_by_bank = GROUP debtor_transactions BY id_banque;
-debtor_counts = FOREACH grouped_by_bank GENERATE group AS bank, COUNT(debtor_transactions) AS num_debtors;
-DUMP debtor_counts;
+# 3. Results summary
+echo "   - Atelier 1: HDFS operations ✓"
+echo "   - Atelier 2: MapReduce WordCount ✓"
+echo "   - Atelier 3: Pig analytics ✓"
+echo "   - Atelier 4: Hive basic queries ✓"
+echo "   - Atelier 5: Hive file formats ✓"
+echo "   - Atelier 6: Hive partitioning ✓"
 
-  
+echo "🎉 ALL 6 ATELIERS COMPLETED SUCCESSFULLY! 🎉"
+```
 
-4. Clients with a negative overall balance:
-code Pig
-IGNORE_WHEN_COPYING_START
-IGNORE_WHEN_COPYING_END
+---
 
-    
-records = LOAD 'bank.csv' USING PigStorage(';') AS (id_banque:chararray, id_client:int, verse:long, retire:long, annee:int);
-grouped_by_client = GROUP records BY id_client;
-balances = FOREACH grouped_by_client GENERATE group AS client, SUM(records.verse) AS total_deposited, SUM(records.retire) AS total_withdrawn;
-net_debtors = FILTER balances BY total_deposited < total_withdrawn;
-DUMP net_debtors.client;
+## 📊 Execution Summary
 
-  
+This guide completes:
 
-5. Banks with at least one net debtor:
-code Pig
-IGNORE_WHEN_COPYING_START
-IGNORE_WHEN_COPYING_END
+* ✅ Organized HDFS structure
+* ✅ HDFS commands (Atelier 1)
+* ✅ MapReduce WordCount (Atelier 2)
+* ✅ Pig data processing (Atelier 3)
+* ✅ Hive basics (Atelier 4)
+* ✅ Hive file formats (Atelier 5)
+* ✅ Hive partitioning (Atelier 6)
+* ✅ Final verification
 
-    
--- (Continuing from previous script)
-records = LOAD 'bank.csv' USING PigStorage(';') AS (id_banque:chararray, id_client:int, verse:long, retire:long, annee:int);
-grouped_by_client = GROUP records BY (id_banque, id_client);
-balances = FOREACH grouped_by_client GENERATE group.id_banque as banque, group.id_client as client, SUM(records.verse) - SUM(records.retire) as balance;
-net_debtors = FILTER balances BY balance < 0;
-banks_with_debtors = DISTINCT net_debtors.banque;
-DUMP banks_with_debtors;
+---
 
-  
-
-6. Tuples of (bank_id, {list of client_ids}):
-code Pig
-IGNORE_WHEN_COPYING_START
-IGNORE_WHEN_COPYING_END
-
-    
-records = LOAD 'bank.csv' USING PigStorage(';') AS (id_banque:chararray, id_client:int);
-grouped_by_bank = GROUP records BY id_banque;
-client_list = FOREACH grouped_by_bank GENERATE group AS bank_id, records.id_client AS client_ids;
-DUMP client_list;
-
-  
+🎯 You can now run each atelier step by step and verify results directly in HDFS/Hive.
