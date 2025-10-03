@@ -8,8 +8,16 @@
 </p>  
 
 <p align="center">  
-A complete <b>Hadoop ecosystem lab</b> with <b>6 ateliers</b> to practice HDFS, MapReduce, Pig, Hive, file formats, and partitioning.  
-Everything runs in <b>Docker</b> for simplicity and reproducibility.  
+A complete **Hadoop ecosystem lab** with **6 ateliers** to practice:  
+🔹 HDFS  
+🔹 MapReduce  
+🔹 Pig  
+🔹 Hive  
+🔹 File formats  
+🔹 Partitioning  
+
+All running in **Docker** for simplicity and reproducibility.
+
 </p>  
 
 ---
@@ -30,18 +38,15 @@ flowchart TD
 
 ## ⚡ Quick Start
 
-<details>  
-<summary>🔧 Setup Instructions</summary>  
-
 ```bash
-# Clone repo
+# Clone repository
 git clone https://github.com/your-org/hadoop-ecosystem-ateliers.git
 cd hadoop-ecosystem-ateliers
 
 # Build and start cluster
 docker compose up -d --build
 
-# Enter namenode
+# Access Namenode
 docker exec -it namenode bash
 
 # Prepare ateliers in HDFS
@@ -53,17 +58,14 @@ for i in {1..6}; do
 done
 ```
 
-</details>  
-
 ---
 
-# 📚 Ateliers
+## 📚 Ateliers
 
----
+### 1️⃣ Atelier 1 – HDFS Basics
 
-## 1️⃣ Atelier 1 – HDFS Basics
-
-<p align="center"><b>Explore HDFS commands and block reports.</b></p>
+<details>
+<summary>🔎 Explore HDFS</summary>
 
 ```bash
 # List ateliers
@@ -72,19 +74,23 @@ hdfs dfs -ls /ateliers/
 # Show contents
 hdfs dfs -cat /ateliers/atelier1/input/FL_insurance.csv | head -3
 
-# Report
+# Cluster report
 hdfs dfsadmin -report | head -20
 ```
 
-✅ **Goal**: Learn file navigation, inspection, and block reports.
+✅ Learn file navigation, inspection, and block reports.
+
+</details>
 
 ---
 
-## 2️⃣ Atelier 2 – MapReduce
+### 2️⃣ Atelier 2 – MapReduce
 
-<p align="center"><b>Run your first MapReduce WordCount job.</b></p>
+<details>
+<summary>⚙️ Run WordCount Job</summary>
 
 ```bash
+# Create input/output dirs
 hdfs dfs -mkdir -p /ateliers/atelier2/wordcount/{input,output}
 hdfs dfs -put /ateliers/atelier2/maman.txt /ateliers/atelier2/wordcount/input/
 
@@ -98,13 +104,16 @@ hadoop jar wordcount.jar WordCount \
   /ateliers/atelier2/wordcount/output
 ```
 
-✅ **Goal**: Understand compilation, packaging, and execution of MapReduce jobs.
+✅ Hands-on with MapReduce workflow.
+
+</details>
 
 ---
 
-## 3️⃣ Atelier 3 – Pig
+### 3️⃣ Atelier 3 – Pig
 
-<p align="center"><b>Analytics with Pig scripting.</b></p>
+<details>
+<summary>🐖 Pig Analytics</summary>
 
 ```bash
 pig -x local << 'EOF'
@@ -117,13 +126,16 @@ quit;
 EOF
 ```
 
-✅ **Goal**: Aggregations with Pig Latin.
+✅ Aggregations with Pig scripting.
+
+</details>
 
 ---
 
-## 4️⃣ Atelier 4 – Hive Basics
+### 4️⃣ Atelier 4 – Hive Basics
 
-<p align="center"><b>Query datasets with SQL using Hive.</b></p>
+<details>
+<summary>🐝 Hive SQL</summary>
 
 ```sql
 CREATE DATABASE IF NOT EXISTS atelier4;
@@ -140,13 +152,16 @@ LOCATION '/ateliers/atelier4/';
 SELECT depart, COUNT(*) FROM vols GROUP BY depart LIMIT 10;
 ```
 
-✅ **Goal**: Create and query Hive tables.
+✅ Create & query Hive tables.
+
+</details>
 
 ---
 
-## 5️⃣ Atelier 5 – Hive File Formats
+### 5️⃣ Atelier 5 – Hive File Formats
 
-<p align="center"><b>Compare performance of text vs Parquet.</b></p>
+<details>
+<summary>📦 Text vs Parquet</summary>
 
 ```sql
 CREATE EXTERNAL TABLE bank_txt (
@@ -161,13 +176,16 @@ CREATE TABLE bank_parquet STORED AS PARQUET AS SELECT * FROM bank_txt;
 SELECT region, AVG(income) FROM bank_txt GROUP BY region;
 ```
 
-✅ **Goal**: Learn storage formats (Text vs Parquet).
+✅ Compare storage formats.
+
+</details>
 
 ---
 
-## 6️⃣ Atelier 6 – Hive Partitioning
+### 6️⃣ Atelier 6 – Hive Partitioning
 
-<p align="center"><b>Optimize queries with partitioned tables.</b></p>
+<details>
+<summary>📊 Partitioned Tables</summary>
 
 ```sql
 CREATE TABLE bank_partitioned (
@@ -176,7 +194,7 @@ CREATE TABLE bank_partitioned (
 PARTITIONED BY (region STRING)
 ROW FORMAT DELIMITED FIELDS TERMINATED BY ',';
 
--- Dynamic partitioning
+-- Enable dynamic partitioning
 SET hive.exec.dynamic.partition = true;
 SET hive.exec.dynamic.partition.mode = nonstrict;
 
@@ -184,23 +202,22 @@ INSERT OVERWRITE TABLE bank_partitioned PARTITION(region)
 SELECT id, age, sex, income, region FROM atelier5.bank_txt;
 ```
 
-✅ **Goal**: Learn Hive partitioning for performance.
+✅ Partitioning for query optimization.
+
+</details>
 
 ---
 
-# ✅ Progress Tracker
+## ✅ Progress Tracker
 
-<p align="center">  
-<table>  
-<tr><th>Atelier</th><th>Status</th></tr>  
-<tr><td>HDFS</td><td>✅ Completed</td></tr>  
-<tr><td>MapReduce</td><td>✅ Completed</td></tr>  
-<tr><td>Pig</td><td>✅ Completed</td></tr>  
-<tr><td>Hive Basics</td><td>✅ Completed</td></tr>  
-<tr><td>Hive File Formats</td><td>✅ Completed</td></tr>  
-<tr><td>Hive Partitioning</td><td>✅ Completed</td></tr>  
-</table>  
-</p>  
+| Atelier           | Status      |
+| ----------------- | ----------- |
+| HDFS              | ✅ Completed |
+| MapReduce         | ✅ Completed |
+| Pig               | ✅ Completed |
+| Hive Basics       | ✅ Completed |
+| Hive File Formats | ✅ Completed |
+| Hive Partitioning | ✅ Completed |
 
 ---
 
