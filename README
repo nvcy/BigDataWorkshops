@@ -1,224 +1,115 @@
-**🚀 Big Data Ateliers – Complete Hadoop Ecosystem **
+\# 🚀 Big Data Ateliers – Complete Hadoop Ecosystem \<div
+align="center"\> \<img
+src="https://img.shields.io/badge/Docker-ready-blue?logo=docker"\> \<img
+src="https://img.shields.io/badge/Hadoop-3.x-yellow?logo=apache"\> \<img
+src="https://img.shields.io/badge/Hive-SQL-orange?logo=apachehive"\>
+\<img
+src="https://img.shields.io/badge/Pig-Scripting-lightgrey?logo=apache"\>
+\<img src="https://img.shields.io/badge/License-MIT-green"\>
+\<br\>\<br\> A complete Hadoop ecosystem lab with 6 ateliers to practice
+HDFS, MapReduce, Pig, Hive, file formats, and partitioning. Everything
+runs in Docker for simplicity and reproducibility. 🔹 Quick Start • 🔹
+Ateliers • 🔹 Architecture • 🔹 Progress \</div\> --- \## 📋 Table of
+Contents - 🌟 Overview - 🏗 Architecture - ⚡ Quick Start - 🎯 Ateliers -
+📊 Progress Tracker - 🤝 Contributing - 📝 License --- \## 🌟 Overview
+Welcome to the Big Data Learning Journey! This project provides a
+comprehensive Hadoop learning environment with 6 hands-on ateliers
+covering the entire big data processing pipeline: \| 🧪 Module \| 🔧
+Technology \| 🎯 Focus Area \|
+\|--------------\|---------------\|---------------------------\| \| 📁
+Atelier 1 \| HDFS \| Distributed File System \| \| ⚙️ Atelier 2 \|
+MapReduce \| Distributed Processing \| \| 🐖 Atelier 3 \| Pig \| Data
+Flow Scripting \| \| 🐝 Atelier 4 \| Hive \| SQL Data Warehousing \| \|
+💾 Atelier 5 \| Hive \| Storage Optimization \| \| 🚀 Atelier 6 \| Hive
+\| Query Performance \| --- \## 🏗 Architecture \`\`\`mermaid flowchart
+TD Client\[💻 Client\] --\> NN\[Namenode\] NN --\>\|Stores metadata\|
+DNs\[Datanodes\] DNs --\>\|Stores blocks\| HDFS\[(HDFS Storage)\] HDFS
+--\> MR\[⚙️ MapReduce\] MR --\> Pig\[🐖 Pig Scripts\] MR --\> Hive\[🐝
+Hive SQL\] style Client fill:#e1f5fe style NN fill:#f3e5f5 style DNs
+fill:#e8f5e8 style HDFS fill:#fff3e0 🔧 Prerequisites 🐳 Docker & Docker
+Compose 📦 Git 💻 4GB+ RAM available 🚀 Deployment Steps \# 📥 Clone
+repository git clone
+https://github.com/your-org/hadoop-ecosystem-ateliers.git cd
+hadoop-ecosystem-ateliers \# 🏗 Build and start the cluster docker
+compose up -d --build \# 🔑 Access the namenode container docker exec
+-it namenode bash \# 📁 Prepare HDFS directory structure hdfs dfs -mkdir
+-p /ateliers/{atelier1,atelier2,atelier3,atelier4,atelier5,atelier6} \#
+📤 Upload datasets to HDFS for i in {1..6}; do hdfs dfs -put
+/ateliers_local/atelier\$i/\* /ateliers/atelier\$i/ done \# ✅ Verify
+setup hdfs dfs -ls -R /ateliers 🔍 System Verification \# 📊 Check HDFS
+status hdfs dfsadmin -report \# 🐳 Verify services are running docker ps
+\# 🔍 Test basic HDFS operations hdfs dfs -ls / 🎯 Ateliers 1️⃣ Atelier 1
+– HDFS Basics hdfs dfs -ls /ateliers/atelier1/ hdfs dfs -cat
+/ateliers/atelier1/input/FL_insurance.csv \| head -3 hdfs dfsadmin
+-report \| head -20 hdfs fsck /ateliers/atelier1 -blocks -locations
+Learning Objectives: 📁 HDFS file navigation and inspection 🧱 Block
+storage concepts 📊 Cluster monitoring and reporting 2️⃣ Atelier 2 –
+MapReduce hdfs dfs -mkdir -p /ateliers/atelier2/wordcount/{input,output}
+hdfs dfs -put /ateliers/atelier2/maman.txt
+/ateliers/atelier2/wordcount/input/ javac -cp \$(hadoop classpath) -d
+build WordCount.java jar -cvf wordcount.jar -C build/ . hadoop jar
+wordcount.jar WordCount \\ /ateliers/atelier2/wordcount/input \\
+/ateliers/atelier2/wordcount/output hdfs dfs -cat
+/ateliers/atelier2/wordcount/output/part-r-00000 \| head -10 Learning
+Objectives: ⚙️ MapReduce programming model 🏗 Java compilation and JAR
+packaging 📊 Job submission and monitoring 3️⃣ Atelier 3 – Pig pig -x
+local \<\< 'EOF' vols = LOAD '/ateliers/atelier3/vol.csv' USING
+PigStorage(';') AS (year:int, month:int, day:int, flight:chararray,
+depart:chararray, destination:chararray, distance:int); departure_counts
+= FOREACH (GROUP vols BY depart) GENERATE group AS airport, COUNT(vols)
+AS flight_count; STORE departure_counts INTO
+'/ateliers/atelier3/pig_output/departure_counts'; quit; EOF hdfs dfs
+-cat /ateliers/atelier3/pig_output/departure_counts/part-r-00000
+Learning Objectives: 📝 Pig Latin syntax and data flow 🔄 Data
+transformation and aggregation ⚡ Script execution modes 4️⃣ Atelier 4 –
+Hive Basics CREATE DATABASE IF NOT EXISTS atelier4; USE atelier4; CREATE
+EXTERNAL TABLE vols ( year INT, month INT, day INT, flight STRING,
+depart STRING, destination STRING, distance INT ) ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ';' LOCATION '/ateliers/atelier4/'; SELECT depart,
+COUNT(\*) as flight_count FROM vols GROUP BY depart ORDER BY
+flight_count DESC LIMIT 10; SELECT depart, destination, AVG(distance) as
+avg_distance FROM vols GROUP BY depart, destination LIMIT 10; Learning
+Objectives: 🏗 Hive table creation and management 📊 SQL queries on
+structured data 🔗 External tables and data location mapping 5️⃣ Atelier
+5 – Hive File Formats USE atelier5; CREATE EXTERNAL TABLE bank_txt ( id
+INT, age INT, sex STRING, region STRING, income DOUBLE ) ROW FORMAT
+DELIMITED FIELDS TERMINATED BY ',' LOCATION '/ateliers/atelier5/';
+CREATE TABLE bank_parquet STORED AS PARQUET AS SELECT \* FROM bank_txt;
+SELECT region, AVG(income) as avg_income FROM bank_txt GROUP BY region;
+SELECT region, AVG(income) as avg_income FROM bank_parquet GROUP BY
+region; DESC FORMATTED bank_txt; DESC FORMATTED bank_parquet; Learning
+Objectives:
+
+💾 Storage format comparison (Text vs Parquet)
+
+⚡ Performance benchmarking
+
+🚀 Storage optimization techniques
+
+6️⃣ Atelier 6 – Hive Partitioning USE atelier6;
+
+CREATE TABLE bank_partitioned ( id INT, age INT, sex STRING, income
+DOUBLE ) PARTITIONED BY (region STRING) ROW FORMAT DELIMITED FIELDS
+TERMINATED BY ',';
+
+SET hive.exec.dynamic.partition = true; SET
+hive.exec.dynamic.partition.mode = nonstrict;
+
+INSERT OVERWRITE TABLE bank_partitioned PARTITION(region) SELECT id,
+age, sex, income, region FROM atelier5.bank_txt;
+
+SELECT COUNT(\*) FROM bank_partitioned WHERE region = 'Europe';
 
-<p align="center">  
-  <img src="https://img.shields.io/badge/Docker-ready-blue?logo=docker"/>  
-  <img src="https://img.shields.io/badge/Hadoop-3.x-yellow?logo=apache"/>  
-  <img src="https://img.shields.io/badge/Hive-SQL-orange?logo=apachehive"/>  
-  <img src="https://img.shields.io/badge/Pig-Scripting-lightgrey?logo=apache"/>  
-</p>  
+SHOW PARTITIONS bank_partitioned; ANALYZE TABLE bank_partitioned COMPUTE
+STATISTICS; Learning Objectives:
 
-<p align="center">  
-A complete **Hadoop ecosystem lab** with **6 ateliers** to practice:  
-🔹 HDFS  
-🔹 MapReduce  
-🔹 Pig  
-🔹 Hive  
-🔹 File formats  
-🔹 Partitioning  
+🗂 Partitioning concepts and benefits
 
-All running in **Docker** for simplicity and reproducibility.
+⚡ Dynamic partitioning setup
 
-</p>  
-
----
-
-## 🌐 Architecture
-
-```mermaid
-flowchart TD
-    Client[💻 Client] --> NN[Namenode]
-    NN -->|Stores metadata| DNs[Datanodes]
-    DNs -->|Stores blocks| HDFS[(HDFS Storage)]
-    HDFS --> MR[⚙️ MapReduce]
-    MR --> Pig[🐖 Pig Scripts]
-    MR --> Hive[🐝 Hive SQL]
-```
-
----
-
-## ⚡ Quick Start
-
-```bash
-# Clone repository
-git clone https://github.com/your-org/hadoop-ecosystem-ateliers.git
-cd hadoop-ecosystem-ateliers
-
-# Build and start cluster
-docker compose up -d --build
-
-# Access Namenode
-docker exec -it namenode bash
-
-# Prepare ateliers in HDFS
-hdfs dfs -mkdir -p /ateliers/{atelier1,atelier2,atelier3,atelier4,atelier5,atelier6}
-
-# Upload datasets
-for i in {1..6}; do
-  hdfs dfs -put /ateliers_local/atelier$i/* /ateliers/atelier$i/
-done
-```
-
----
-
-## 📚 Ateliers
-
-### 1️⃣ Atelier 1 – HDFS Basics
-
-<details>
-<summary>🔎 Explore HDFS</summary>
-
-```bash
-# List ateliers
-hdfs dfs -ls /ateliers/
-
-# Show contents
-hdfs dfs -cat /ateliers/atelier1/input/FL_insurance.csv | head -3
-
-# Cluster report
-hdfs dfsadmin -report | head -20
-```
-
-✅ Learn file navigation, inspection, and block reports.
-
-</details>
-
----
-
-### 2️⃣ Atelier 2 – MapReduce
-
-<details>
-<summary>⚙️ Run WordCount Job</summary>
-
-```bash
-# Create input/output dirs
-hdfs dfs -mkdir -p /ateliers/atelier2/wordcount/{input,output}
-hdfs dfs -put /ateliers/atelier2/maman.txt /ateliers/atelier2/wordcount/input/
-
-# Compile & package
-javac -cp $(hadoop classpath) -d build WordCount.java
-jar -cvf wordcount.jar -C build/ .
-
-# Run job
-hadoop jar wordcount.jar WordCount \
-  /ateliers/atelier2/wordcount/input \
-  /ateliers/atelier2/wordcount/output
-```
-
-✅ Hands-on with MapReduce workflow.
-
-</details>
-
----
-
-### 3️⃣ Atelier 3 – Pig
-
-<details>
-<summary>🐖 Pig Analytics</summary>
-
-```bash
-pig -x local << 'EOF'
-vols = LOAD '/ateliers/atelier3/vol.csv' USING PigStorage(';') 
-       AS (year:int, month:int, day:int, flight:chararray, depart:chararray, destination:chararray, distance:int);
-
-departure_counts = FOREACH (GROUP vols BY depart) GENERATE group, COUNT(vols);
-STORE departure_counts INTO '/ateliers/atelier3/pig_output/departure_counts';
-quit;
-EOF
-```
-
-✅ Aggregations with Pig scripting.
-
-</details>
-
----
-
-### 4️⃣ Atelier 4 – Hive Basics
-
-<details>
-<summary>🐝 Hive SQL</summary>
-
-```sql
-CREATE DATABASE IF NOT EXISTS atelier4;
-USE atelier4;
-
-CREATE EXTERNAL TABLE vols (
-    year INT, month INT, day INT, flight STRING,
-    depart STRING, destination STRING, distance INT
-)
-ROW FORMAT DELIMITED FIELDS TERMINATED BY ';'
-LOCATION '/ateliers/atelier4/';
-
--- Flights per airport
-SELECT depart, COUNT(*) FROM vols GROUP BY depart LIMIT 10;
-```
-
-✅ Create & query Hive tables.
-
-</details>
-
----
-
-### 5️⃣ Atelier 5 – Hive File Formats
-
-<details>
-<summary>📦 Text vs Parquet</summary>
-
-```sql
-CREATE EXTERNAL TABLE bank_txt (
-    id INT, age INT, sex STRING, region STRING, income DOUBLE
-)
-ROW FORMAT DELIMITED FIELDS TERMINATED BY ','
-LOCATION '/ateliers/atelier5/';
-
-CREATE TABLE bank_parquet STORED AS PARQUET AS SELECT * FROM bank_txt;
-
--- Compare performance
-SELECT region, AVG(income) FROM bank_txt GROUP BY region;
-```
-
-✅ Compare storage formats.
-
-</details>
-
----
-
-### 6️⃣ Atelier 6 – Hive Partitioning
-
-<details>
-<summary>📊 Partitioned Tables</summary>
-
-```sql
-CREATE TABLE bank_partitioned (
-    id INT, age INT, sex STRING, income DOUBLE
-)
-PARTITIONED BY (region STRING)
-ROW FORMAT DELIMITED FIELDS TERMINATED BY ',';
-
--- Enable dynamic partitioning
-SET hive.exec.dynamic.partition = true;
-SET hive.exec.dynamic.partition.mode = nonstrict;
-
-INSERT OVERWRITE TABLE bank_partitioned PARTITION(region)
-SELECT id, age, sex, income, region FROM atelier5.bank_txt;
-```
-
-✅ Partitioning for query optimization.
-
-</details>
-
----
-
-## ✅ Progress Tracker
-
-| Atelier           | Status      |
-| ----------------- | ----------- |
-| HDFS              | ✅ Completed |
-| MapReduce         | ✅ Completed |
-| Pig               | ✅ Completed |
-| Hive Basics       | ✅ Completed |
-| Hive File Formats | ✅ Completed |
-| Hive Partitioning | ✅ Completed |
-
----
-
-<p align="center"><i>🎉 Congratulations! You now have a fully running Hadoop ecosystem with all 6 ateliers explored.</i></p>  
+🚀 Query optimization with partitions 📊 Progress Tracker \# Atelier
+Topic Status Difficulty 1️⃣ Atelier 1 HDFS Basics ✅ Completed 🟢
+Beginner 2️⃣ Atelier 2 MapReduce ✅ Completed 🟡 Intermediate 3️⃣ Atelier
+3 Pig Scripting ✅ Completed 🟡 Intermediate 4️⃣ Atelier 4 Hive Basics ✅
+Completed 🟢 Beginner 5️⃣ Atelier 5 Hive File Formats ✅ Completed 🟡
+Intermediate 6️⃣ Atelier 6 Hive Partitioning ✅ Completed 🔴 Advanced
